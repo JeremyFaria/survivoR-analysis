@@ -45,3 +45,4 @@ ggplot(data = screen_time_players_boot_ingame_grouped) +
   geom_bar(aes(fill = bipoc,x=episode,y=average_screen_time), stat="identity", position = "dodge")
 
 vote_history <- vote_history
+
