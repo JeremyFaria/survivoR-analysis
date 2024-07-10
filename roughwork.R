@@ -4,6 +4,7 @@ library(stringr)
 library(ggplot2)
 library(usmap)
 library(plotly)
+library(igraph)
 castaway_details <- castaway_details
 us_castaways <- dplyr::filter(castaway_details, grepl("^US", castaway_details$castaway_id))
 castaways_id_season <- dplyr::select(castaways, castaway_id, season)
@@ -45,4 +46,11 @@ ggplot(data = screen_time_players_boot_ingame_grouped) +
   geom_bar(aes(fill = bipoc,x=episode,y=average_screen_time), stat="identity", position = "dodge")
 
 vote_history <- vote_history
-
+boot_mapping_original <- dplyr::filter(boot_mapping, tribe_status == 'Original')
+vote_history_boot_map_og <- inner_join(vote_history, boot_mapping_original, by = c('season' = 'season', 'episode' = 'episode', 'castaway' = 'castaway'))
+vote_history_boot_map_og_s1 <- dplyr::filter(vote_history_boot_map_og, season_name.x == "Survivor: Borneo")
+borneo_before_graph <- vote_history_boot_map_og_s1 %>% select(castaway, vote)
+voters_s1 = borneo_before_graph[['castaway']]
+voted_s1 = borneo_before_graph[['vote']]
+borneo_ready_for_graph = c(rbind(voters_s1, voted_s1))
+plot(graph(borneo_ready_for_graph))
