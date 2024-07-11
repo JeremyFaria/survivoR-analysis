@@ -46,10 +46,25 @@ ggplot(data = screen_time_players_boot_ingame_grouped) +
   geom_bar(aes(fill = bipoc,x=episode,y=average_screen_time), stat="identity", position = "dodge")
 
 vote_history <- vote_history
-boot_mapping_original <- dplyr::filter(boot_mapping, tribe_status == 'Original')
+boot_mapping_original <- dplyr::filter(boot_mapping)
 vote_history_boot_map_og <- inner_join(vote_history, boot_mapping_original, by = c('season' = 'season', 'episode' = 'episode', 'castaway' = 'castaway'))
-vote_history_boot_map_og_s1 <- dplyr::filter(vote_history_boot_map_og, season_name.x == "Survivor: Borneo")
-borneo_before_graph <- vote_history_boot_map_og_s1 %>% select(castaway, vote)
+vote_history_boot_map_og_tagi <- dplyr::filter(vote_history_boot_map_og, season_name.x == "Survivor: Borneo", tribe.x == "Tagi")
+borneo_before_graph <- vote_history_boot_map_og_tagi %>% select(castaway, vote)
+voters_s1 = borneo_before_graph[['castaway']]
+voted_s1 = borneo_before_graph[['vote']]
+borneo_ready_for_graph = c(rbind(voters_s1, voted_s1))
+plot(graph(borneo_ready_for_graph))
+
+vote_history_boot_map_og_pagong <- dplyr::filter(vote_history_boot_map_og, season_name.x == "Survivor: Borneo", tribe.x == "Pagong")
+borneo_before_graph <- vote_history_boot_map_og_pagong %>% select(castaway, vote)
+voters_s1 = borneo_before_graph[['castaway']]
+voted_s1 = borneo_before_graph[['vote']]
+borneo_ready_for_graph = c(rbind(voters_s1, voted_s1))
+plot(graph(borneo_ready_for_graph))
+
+vote_history_boot_map_og_pagong <- dplyr::filter(vote_history_boot_map_og, season_name.x == "Survivor: Borneo", tribe.x == "Rattana")
+borneo_before_graph <- vote_history_boot_map_og_pagong %>% select(castaway, vote)
+borneo_before_graph <- borneo_before_graph[complete.cases(borneo_before_graph), ]
 voters_s1 = borneo_before_graph[['castaway']]
 voted_s1 = borneo_before_graph[['vote']]
 borneo_ready_for_graph = c(rbind(voters_s1, voted_s1))
