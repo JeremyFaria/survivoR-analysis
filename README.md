@@ -1,2 +1,2 @@
 # survivoR-analysis
-Data analysisi using the survivoR package in R
+Data analysis using the survivoR package in R
