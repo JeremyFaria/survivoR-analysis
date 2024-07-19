@@ -10,12 +10,13 @@
 library(shiny)
 library(survivoR)
 library(igraph)
+library(dplyr)
 
+boot_mapping <- boot_mapping
+vote_history <- vote_history
 generate_voting_graph <- function(season, tribe){
-  boot_mapping <- boot_mapping
-  vote_history <- vote_history
-  season <- season
-  tribe <- tribe
+  season <- "Survivor: Borneo"
+  tribe <- "Tagi"
   tribe_status <- "Original"
   boot_mapping_original <- dplyr::filter(boot_mapping)
   vote_history_boot_map_og <- inner_join(vote_history, boot_mapping_original, by = c('season' = 'season', 'episode' = 'episode', 'castaway' = 'castaway'))
@@ -86,9 +87,26 @@ server <- function(input, output) {
         selectInput("Tribe", "Select a tribe", temp_tribe)
       }
     })
-    voting_graph <- reactive(generate_voting_graph(input$Season, renderText(output$Tribe)))
+    
+    season_ready_for_graph <- reactive(
+      season <- input$Season
+      tribe <- renderText(output$Tribe)
+      
+    )
+    
     output$Graph <- renderPlot({
-      print(plot(voting_graph()))
+      season <- input$Season
+      tribe <- renderText(output$Tribe)
+      tribe_status <- "Original"
+      boot_mapping_original <- dplyr::filter(boot_mapping)
+      vote_history_boot_map_og <- inner_join(vote_history, boot_mapping_original, by = c('season' = 'season', 'episode' = 'episode', 'castaway' = 'castaway'))
+      vote_history_boot_map_og_tribe <- renderDataTable({dplyr::filter(vote_history_boot_map_og, season_name.x == !!season, tribe.x == !!tribe, tribe_status.x == !!tribe_status)})
+      season_before_graph <- vote_history_boot_map_og_tribe %>% renderDataTable({select(castaway, vote)})
+      season_before_graph <- renderDataTable({season_before_graph[complete.cases(season_before_graph), ]})
+      voters_s = renderDataTable({season_before_graph[['castaway']]})
+      voted_s = renderDataTable({season_before_graph[['vote']]})
+      season_ready_for_graph = renderDataTable({c(rbind(voters_s, voted_s))})
+      plot(graph(dataTableOutput("season_ready_for_graph")))
     })
 }
 

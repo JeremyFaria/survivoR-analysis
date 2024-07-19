@@ -1,10 +1,13 @@
 ## demo graph script
+library(survivoR)
+library(dplyr)
+library(igraph)
 
 boot_mapping <- boot_mapping
 vote_history <- vote_history
-season <- readline(prompt = "Enter a season: ");
-tribe <- readline(prompt = "Enter a tribe: ");
-tribe_status <- readline(prompt = "Enter a tribe status: ");
+season <- "Survivor: Borneo"
+tribe <- "Tagi"
+tribe_status <- "Original"
 boot_mapping_original <- dplyr::filter(boot_mapping)
 vote_history_boot_map_og <- inner_join(vote_history, boot_mapping_original, by = c('season' = 'season', 'episode' = 'episode', 'castaway' = 'castaway'))
 vote_history_boot_map_og_tribe <- dplyr::filter(vote_history_boot_map_og, season_name.x == !!season, tribe.x == !!tribe, tribe_status.x == !!tribe_status)
@@ -14,3 +17,5 @@ voters_s = season_before_graph[['castaway']]
 voted_s = season_before_graph[['vote']]
 season_ready_for_graph = c(rbind(voters_s, voted_s))
 plot(graph(season_ready_for_graph))
+
+plot(graph(c(1,2,1,3)))
