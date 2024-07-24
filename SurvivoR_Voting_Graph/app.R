@@ -57,57 +57,43 @@ ui <- fluidPage(
 server <- function(input, output) {
 
     output$Tribe <- renderUI({
-      if(input$Season == "Survivor: Borneo"){
-        temp_season <- vote_history %>% dplyr::filter(season_name == "Survivor: Borneo")
+        temp_season <- vote_history[vote_history$season_name == input$Season,]
         temp_tribe <- as.vector(unique(temp_season$tribe))
         selectInput("Tribe", "Select a tribe", temp_tribe)
-      }else if(input$Season == "Survivor: The Australian Outback"){
-        temp_season <- vote_history %>% dplyr::filter(season_name == "Survivor: The Australian Outback")
-        temp_tribe <- as.vector(unique(temp_season$tribe))
-        selectInput("Tribe", "Select a tribe", temp_tribe)
-      }else if(input$Season == "Survivor: Africa"){
-        temp_season <- vote_history %>% dplyr::filter(season_name == "Survivor: Africa")
-        temp_tribe <- as.vector(unique(temp_season$tribe))
-        selectInput("Tribe", "Select a tribe", temp_tribe)
-      }else if(input$Season == "Survivor: Marquesas"){
-        temp_season <- vote_history %>% dplyr::filter(season_name == "Survivor: Marquesas")
-        temp_tribe <- as.vector(unique(temp_season$tribe))
-        selectInput("Tribe", "Select a tribe", temp_tribe)
-      }else if(input$Season == "Survivor: Thailand"){
-        temp_season <- vote_history %>% dplyr::filter(season_name == "Survivor: Thailand")
-        temp_tribe <- as.vector(unique(temp_season$tribe))
-        selectInput("Tribe", "Select a tribe", temp_tribe)
-      }else if(input$Season == "Survivor: The Amazon"){
-        temp_season <- vote_history %>% dplyr::filter(season_name == "Survivor: The Amazon")
-        temp_tribe <- as.vector(unique(temp_season$tribe))
-        selectInput("Tribe", "Select a tribe", temp_tribe)
-      }else if(input$Season == "Survivor: Pearl Islands"){
-        temp_season <- vote_history %>% dplyr::filter(season_name == "Survivor: Pearl Islands")
-        temp_tribe <- as.vector(unique(temp_season$tribe))
-        selectInput("Tribe", "Select a tribe", temp_tribe)
-      }
     })
     
-    season_ready_for_graph <- reactive(
+    data_for_graph <- reactive({
       season <- input$Season
-      tribe <- renderText(output$Tribe)
-      
-    )
-    
-    output$Graph <- renderPlot({
-      season <- input$Season
-      tribe <- renderText(output$Tribe)
+      tribe <- input$Tribe
       tribe_status <- "Original"
       boot_mapping_original <- dplyr::filter(boot_mapping)
       vote_history_boot_map_og <- inner_join(vote_history, boot_mapping_original, by = c('season' = 'season', 'episode' = 'episode', 'castaway' = 'castaway'))
-      vote_history_boot_map_og_tribe <- renderDataTable({dplyr::filter(vote_history_boot_map_og, season_name.x == !!season, tribe.x == !!tribe, tribe_status.x == !!tribe_status)})
-      season_before_graph <- vote_history_boot_map_og_tribe %>% renderDataTable({select(castaway, vote)})
-      season_before_graph <- renderDataTable({season_before_graph[complete.cases(season_before_graph), ]})
-      voters_s = renderDataTable({season_before_graph[['castaway']]})
-      voted_s = renderDataTable({season_before_graph[['vote']]})
-      season_ready_for_graph = renderDataTable({c(rbind(voters_s, voted_s))})
-      plot(graph(dataTableOutput("season_ready_for_graph")))
+      vote_history_boot_map_og_tribe <- dplyr::filter(vote_history_boot_map_og, season_name.x == !!season, tribe.x == !!tribe, tribe_status.x == !!tribe_status)
+      season_before_graph <- vote_history_boot_map_og_tribe %>% select(castaway, vote)
+      season_before_graph <- season_before_graph[complete.cases(season_before_graph), ]
+      voters_s <- season_before_graph[['castaway']]
+      voted_s <- season_before_graph[['vote']]
+      c(rbind(voters_s, voted_s))
     })
+    
+    output$Graph <- renderPlot(
+      plot(graph(data_for_graph()))
+    )
+    
+    # output$Graph <- renderPlot({
+    #   season <- input$Season
+    #   tribe <- renderText(output$Tribe)
+    #   tribe_status <- "Original"
+    #   boot_mapping_original <- dplyr::filter(boot_mapping)
+    #   vote_history_boot_map_og <- inner_join(vote_history, boot_mapping_original, by = c('season' = 'season', 'episode' = 'episode', 'castaway' = 'castaway'))
+    #   vote_history_boot_map_og_tribe <- renderDataTable({dplyr::filter(vote_history_boot_map_og, season_name.x == !!season, tribe.x == !!tribe, tribe_status.x == !!tribe_status)})
+    #   season_before_graph <- vote_history_boot_map_og_tribe %>% renderDataTable({select(castaway, vote)})
+    #   season_before_graph <- renderDataTable({season_before_graph[complete.cases(season_before_graph), ]})
+    #   voters_s = renderDataTable({season_before_graph[['castaway']]})
+    #   voted_s = renderDataTable({season_before_graph[['vote']]})
+    #   season_ready_for_graph = renderDataTable({c(rbind(voters_s, voted_s))})
+    #   plot(graph(dataTableOutput("season_ready_for_graph")))
+    # })
 }
 
 # Run the application 

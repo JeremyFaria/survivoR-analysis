@@ -18,4 +18,5 @@ voted_s = season_before_graph[['vote']]
 season_ready_for_graph = c(rbind(voters_s, voted_s))
 plot(graph(season_ready_for_graph))
 
-plot(graph(c(1,2,1,3)))
+
+
